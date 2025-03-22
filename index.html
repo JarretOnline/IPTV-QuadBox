@@ -7,7 +7,190 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     /* General styles */
+    body {<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QUADBOX</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    /* General styles */
     body {
+      display: flex;
+      justify-content: flex-start;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: auto; min-height: 100vh;
+      background-color: #f4f4f4;
+      color: #333;
+      transition: background-color 0.3s, color 0.3s;
+      flex-direction: column;
+    }
+
+    .dark-mode {
+      background-color: #111111;
+      color: #ffffff;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 10px;
+      width: 90%;
+      max-width: 1400px;
+    }
+
+    .video-container {
+      background-color: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: grab;
+      padding: 10px;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .input-container {
+      background-color: #fff;
+      padding: 10px;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dark-mode .input-container {
+      background-color: #222;
+    }
+
+    input[type="text"] {
+      width: 75%;
+      padding: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .dark-mode input[type="text"] {
+      background-color: #222;
+      color: #fff;
+      border: 1px solid #555;
+    }
+
+    button {
+      padding: 5px 10px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .mode-toggle-btn {
+      background-color: #007BFF;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body class="dark-mode"> 
+  <!-- <button class="mode-toggle-btn" onclick="toggleMode()">💡</button> -->
+  <div class="video-grid" id="videoGrid">
+    <div class="video-container" draggable="true" id="video1">
+      <video id="video1-player" controls></video>
+      <button class="toggle-input-btn" onclick="toggleInput('video1')">VIDEO 1</button>
+      <div class="input-container" id="input-container-video1">
+        <input type="text" id="video1-url" placeholder="Enter HLS stream URL for Video 1">
+        <button onclick="updateVideoSource('video1-player', 'video1-url')">LOAD</button>
+      </div>
+    </div>
+    <div class="video-container" draggable="true" id="video2">
+      <video id="video2-player" controls></video>
+      <button class="toggle-input-btn" onclick="toggleInput('video2')">VIDEO 2</button>
+      <div class="input-container" id="input-container-video2">
+        <input type="text" id="video2-url" placeholder="Enter HLS stream URL for Video 2">
+        <button onclick="updateVideoSource('video2-player', 'video2-url')">LOAD</button>
+      </div>
+    </div>
+    <div class="video-container" draggable="true" id="video3">
+      <video id="video3-player" controls></video>
+      <button class="toggle-input-btn" onclick="toggleInput('video3')">VIDEO 3</button>
+      <div class="input-container" id="input-container-video3">
+        <input type="text" id="video3-url" placeholder="Enter HLS stream URL for Video 3">
+        <button onclick="updateVideoSource('video3-player', 'video3-url')">LOAD</button>
+      </div>
+    </div>
+    <div class="video-container" draggable="true" id="video4">
+      <video id="video4-player" controls></video>
+      <button class="toggle-input-btn" onclick="toggleInput('video4')">VIDEO 4</button>
+      <div class="input-container" id="input-container-video4">
+        <input type="text" id="video4-url" placeholder="Enter HLS stream URL for Video 4">
+        <button onclick="updateVideoSource('video4-player', 'video4-url')">LOAD</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    function toggleMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+    function toggleInput(videoId) {
+      var inputContainer = document.getElementById('input-container-' + videoId);
+      inputContainer.style.display = (inputContainer.style.display === 'flex') ? 'none' : 'flex';
+    }
+    function updateVideoSource(videoId, inputId) {
+      var video = document.getElementById(videoId);
+      var url = document.getElementById(inputId).value;
+      if (Hls.isSupported()) {
+        var hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+          video.play();
+        });
+      }  else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.addEventListener('loadedmetadata', function() {
+          video.play();
+        });
+      }
+    }
+    const grid = document.getElementById("videoGrid");
+    let draggedItem = null;
+    document.querySelectorAll(".video-container").forEach((item) => {
+      item.addEventListener("dragstart", (e) => {
+        draggedItem = item;
+        e.dataTransfer.effectAllowed = "move";
+      });
+      item.addEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
+      item.addEventListener("drop", (e) => {
+        e.preventDefault();
+        if (draggedItem && draggedItem !== item) {
+          let parent = grid;
+          let draggedIndex = Array.from(parent.children).indexOf(draggedItem);
+          let targetIndex = Array.from(parent.children).indexOf(item);
+          parent.insertBefore(draggedItem, draggedIndex < targetIndex ? item.nextSibling : item);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+
       display: flex;
       justify-content: flex-start;
       font-family: Arial, sans-serif;
